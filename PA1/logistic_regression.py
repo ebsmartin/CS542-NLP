@@ -22,6 +22,8 @@ class LogisticRegression():
         self.negatives, self.positives = self.load_sentiment_data('opinion-lexicon-English')
         # use of self.feature_dict is optional for this assignment
         self.feature_dict = {'num_pos_words': 0, 'num_neg_words': 1}
+        self.feature_dict = {'fast': 0, 'couple': 1, 'shoot': 2, 'fly': 3}
+
         self.n_features = n_features
         self.theta = np.zeros(n_features + 1) # weights (and bias)
 
