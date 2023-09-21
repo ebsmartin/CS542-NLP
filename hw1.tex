@@ -1,0 +1,97 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage[shortlabels]{enumitem}
+
+\begin{document}
+
+\title{CS 542 (Fall 2023) Written Assignment 1\\Bayes' Theorem and Na\"ive Bayes Classification}
+\author{Due September 7, 2023}
+\date{}
+\maketitle
+
+\section{Bayes' Theorem}
+
+You get an email.  You know that 90\% of your email is legitimate ($L$) while 10\% is spam ($S$).
+
+\begin{enumerate}[a.]
+	\item Assume the following probabilities:
+	\begin{itemize}
+		\item The probability that an email contains the word ``Bitcoin'' ($B$) if it is spam is 96\%.
+		\item The probability that an email contains the word ``Bitcoin'' if it is legitimate is 5\%.
+	\end{itemize}
+	What is the probability that the your new email is spam given that it contains the word ``Bitcoin''? \textbf{Show your work!}
+	\item Assume the following probabilities:
+	\begin{itemize}
+		\item The probability that an email contains the word ``Covid'' ($C$) if it is spam is 50\%.
+		\item The probability that an email contains the word ``Covid'' if it is legitimate is 12\%.
+	\end{itemize}
+	What is the probability that the your new email is legitimate given that it contains the word ``Covid''? \textbf{Show your work!}
+\end{enumerate}
+
+\section{Na\"ive Bayes}
+
+The following problem is from the Jurafsky and Martin book, Exercise 4.2, reproduced below.\\
+
+\noindent Given the following short movie reviews, each labeled with a genre, either comedy or action:
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline 
+document & class \\ 
+\hline 
+fly fast shoot love & action \\ 
+\hline 
+fun couple love love & comedy \\ 
+\hline 
+fast furious shoot & action \\ 
+\hline 
+couple fly fast fun fun & comedy \\ 
+\hline 
+furious shoot shoot fun & action \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+\noindent and a new document D:\\
+
+fast couple shoot fly\\
+
+\noindent compute the most likely class for D. Assume a naive Bayes classifier and use add-1 smoothing for the likelihoods.\\
+
+\noindent \textbf{Show your work!} In particular, show all of the probability distributions involved in the model (namely, $P(\mathrm{class})$ and $P(\mathrm{feature|class})$) and all of the steps used to calculate them. Create (conditional) probability tables such as those shown below.
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline 
+class & $P(\mathrm{class})$ \\ 
+\hline 
+action &  \\ 
+\hline 
+comedy &  \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+\multicolumn{2}{|c|}{\multirow{2}{*}{$P(\mathrm{feature|class})$}} & \multicolumn{4}{|c|}{feature} \\ 
+\cline{3-6}
+\multicolumn{2}{|c|}{} & fast & couple & shoot & fly \\ 
+\hline 
+\multirow{2}{*}{class} & action &  &  &  & \\ 
+\cline{2-6}
+& comedy &  &  &  & \\ 
+\hline
+\end{tabular} 
+\end{center}
+
+Perform Laplace Smoothing to account for words that do not appear in one class.
+
+\section*{Submission Instructions}
+
+Please submit your solutions (in PDF format - printed and scanned images are OK) to the drop box on Canvas.
+
+\end{document}
