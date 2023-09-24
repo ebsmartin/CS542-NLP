@@ -174,9 +174,8 @@ class LogisticRegression():
         '''
         conclusive_word_reached = False
         for word in document:
-            if word in self.conclusive_words and conclusive_word_reached == False:
+            if word in self.conclusive_words and not conclusive_word_reached:
                 conclusive_word_reached = True
-                # print('conclusive word reached')
                 continue 
             if word in self.negatives:
                 if conclusive_word_reached:
@@ -251,8 +250,8 @@ class LogisticRegression():
                 # print('weights updated')
 
                 # END STUDENT CODE
-            print(loss)
-            print('len of filenames: ' + str(len(filenames)))
+            # print(loss)
+            # print('len of filenames: ' + str(len(filenames)))
             loss /= len(filenames)
             print("Average Train Loss: {}".format(loss))
             # randomize order
@@ -292,64 +291,75 @@ class LogisticRegression():
     Also, prints evaluation metrics in readable format.
     '''
     def evaluate(self, results):
-        # BEGIN STUDENT CODE
-        # accuracy = (TP + TN) / (TP + TN + FP + FN)
-        # precision = TP / (TP + FP)
-        # recall = TP / (TP + FN)
-        # F1 = 2 * (precision * recall) / (precision + recall)
+        # Initialize counters for pos class
+        TP_pos = 0 
+        FP_pos = 0
+        TN_pos = 0
+        FN_pos = 0
         
-
-        TP = 0  # true positive
-        FP = 0  # false positive
-        TN = 0  # true negative
-        FN = 0  # false negative
+        # Initialize counters for neg class
+        TP_neg = 0
+        FP_neg = 0
+        TN_neg = 0
+        FN_neg = 0
 
         for name in results:
-            # true positive
+            # True Positive for Positive class and True Negative for Negative class
             if results[name]['correct'] == 1 and results[name]['predicted'] == 1:
-                TP += 1
-            # false positive
+                TP_pos += 1
+                TN_neg += 1
+            # False Positive for Positive class and False Negative for Negative class
             elif results[name]['correct'] == 0 and results[name]['predicted'] == 1:
-                FP += 1
-            # true negative
+                FP_pos += 1
+                FN_neg += 1
+            # True Negative for Positive class and True Positive for Negative class
             elif results[name]['correct'] == 0 and results[name]['predicted'] == 0:
-                TN += 1
-            # false negative
+                TN_pos += 1
+                TP_neg += 1
+            # False Negative for Positive class and False Positive for Negative class
             elif results[name]['correct'] == 1 and results[name]['predicted'] == 0:
-                FN += 1
+                FN_pos += 1
+                FP_neg += 1
 
-        # calculate precision, recall, F1, and accuracy
-        precision = TP / (TP + FP)  # num predicted positive reviews were actually positive
-        recall = TP / (TP + FN)  # num actual positive reviews were predicted positive
-        F1 = 2 * (precision * recall) / (precision + recall)  # F1 thingy
-        accuracy = (TP + TN) / (TP + TN + FP + FN)  #  how many reviews were predicted correctly
+        # Calculate and print metrics for Positive class
+        precision_pos = TP_pos / (TP_pos + FP_pos)
+        recall_pos = TP_pos / (TP_pos + FN_pos)
+        F1_pos = 2 * (precision_pos * recall_pos) / (precision_pos + recall_pos)
+        print("Metrics for Positive Class:")
+        print('Precision: ' + str(round(precision_pos, 4)))
+        print('Recall: ' + str(round(recall_pos, 4)))
+        print('F1: ' + str(round(F1_pos, 4)))
 
-        # print results
-        print('Precision: ' + str(round(precision,2)))
-        print('Recall: ' + str(round(recall,2)))
-        print('F1: ' + str(round(F1,2)))
-        print('Accuracy: ' + str(round(accuracy,2)))
+        # Calculate and print metrics for Negative class
+        precision_neg = TP_neg / (TP_neg + FP_neg)
+        recall_neg = TP_neg / (TP_neg + FN_neg)
+        F1_neg = 2 * (precision_neg * recall_neg) / (precision_neg + recall_neg)
+        print("Metrics for Negative Class:")
+        print('Precision: ' + str(round(precision_neg, 4)))
+        print('Recall: ' + str(round(recall_neg, 4)))
+        print('F1: ' + str(round(F1_neg, 4)))
 
-        return precision, recall, F1, accuracy
-    # END STUDENT CODE
+        # Overall accuracy
+        accuracy = (TP_pos + TN_neg) / (TP_pos + TN_neg + FP_pos + FN_pos)
+        print('Overall Accuracy of Model: ' + str(round(accuracy, 4)))
+
+        return {'pos': {'precision': precision_pos, 'recall': recall_pos, 'F1': F1_pos},
+                'neg': {'precision': precision_neg, 'recall': recall_neg, 'F1': F1_neg},
+                'accuracy': accuracy}
+        
+        # END STUDENT CODE
 
 
+        
     '''---------------------------------------------------------------------------------'''
 
 
 if __name__ == '__main__':
-    lr = LogisticRegression(n_features=8)
-
-    # print('common negative words: ' + str(lr.negatives))
-    # print('common positive words: ' + str(lr.positives))
-
-    # print('common negative bigrams: ' + str(lr.negative_bigrams))
-    # print('common positive bigrams: ' + str(lr.positive_bigrams))
 
     # Painstakingly manually choose words from the top 500 that aren't proper nouns or super movie specific
     # I also added similiar wordss for example, 'lame' was in the list so I added 'lamest'
     # My positives list is longer...not sure if this matters yet
-    lr.negatives = [
+    negatives = [
                     "atrocious", "atrociously",
                     "incoherent", "incoherently",
                     "dud",
@@ -412,7 +422,7 @@ if __name__ == '__main__':
                     "annoy", "annoying", "annoyingly",
                     "aggravate", "aggravating"
                 ]
-    lr.positives = [
+    positives = [
                     "ideal", "ideals",
                     "love", "loving", "lovingly",
                     "masterful", "masterfully",
@@ -528,7 +538,7 @@ if __name__ == '__main__':
     # conclusive words that may be symbollic of the end of a review
     # I thought this can help identify sentiment if we weight the positive and negative words that appear after these words
     # I should have done bigrams but I did this prior to that
-    lr.conclusive_words = [
+    conclusive_words = [
                     "however",
                     "conclusion",
                     "opinion",
@@ -575,7 +585,22 @@ if __name__ == '__main__':
                     "criticism",
                 ]
 
-    # conclusive_words = []
+    #instance of the LogisticRegression class
+    lr = LogisticRegression(n_features=8)
+
+    # print('common negative words: ' + str(lr.negatives))
+    # print('common positive words: ' + str(lr.positives))
+
+    # print('common negative bigrams: ' + str(lr.negative_bigrams))
+    # print('common positive bigrams: ' + str(lr.positive_bigrams))
+
+    # update the raw lists to my cleaned lists
+    lr.negatives = negatives
+    lr.positives = positives
+    lr.conclusive_words = conclusive_words
+    
+    # lr.conclusive_words = []
+
     '''
     Ok so here I am trying to remove the bigrams that have no words in common
     with the union of the negative top N and positive top N
@@ -599,8 +624,72 @@ if __name__ == '__main__':
     # print('revised positive bigrams: ' + str(lr.positive_bigrams))
 
     # make sure these point to the right directories
-    lr.train('movie_reviews/train', batch_size=1, n_epochs=1, eta=0.01)
+    print('Training with hyperparameters: {batch_size=1, n_epochs=1, eta=0.1}\n\n')
+    lr.train('movie_reviews/train', batch_size=1, n_epochs=1, eta=0.1)
+
     # lr.train('movie_reviews_small/train', batch_size=3, n_epochs=1, eta=0.1)
     results = lr.test('movie_reviews/dev')
     # results = lr.test('movie_reviews_small/test')
     lr.evaluate(results)
+
+''' --------------------------------------------------------------------------------- '''
+
+
+''' USE THIS FOR GRID SEARCH'''
+''' comment out everything in the main and then uncomment this out'''
+
+
+    # # Define lists of values for each hyperparameter
+    # batch_sizes = [1, 2, 3, 10]
+    # n_epochs_list = [1, 2, 5, 10]
+    # etas = [0.01, 0.05, 0.1, 0.15, 0.2]
+
+    # # Initialize the best accuracy to a very low value
+    # best_accuracy = 0.0
+    # best_params = {}
+
+    # # Loop over all combinations of hyperparameters
+    # for batch_size in batch_sizes:
+    #     for n_epochs in n_epochs_list:
+    #         for eta in etas:
+    #             print(f"Training with batch_size={batch_size}, n_epochs={n_epochs}, eta={eta}...")
+                
+    #             # Initialize a new LogisticRegression object for each run
+    #             lr = LogisticRegression(n_features=8)
+
+    #             lr.negatives = negatives
+    #             lr.positives = positives
+    #             lr.conclusive_words = conclusive_words
+    #             # lr.conclusive_words = []
+
+    #             # union of negative and positive words for use in filtering bigrams
+    #             pos_neg_union = set(lr.negatives).union(set(lr.positives))
+                        
+    #             # remove negative bigrams that contain two words that are not in the union set
+    #             for bigram in lr.negative_bigrams[:]:  # Iterating over a copy using slicing
+    #                 if bigram[0] not in pos_neg_union and bigram[1] not in pos_neg_union:
+    #                     lr.negative_bigrams.remove(bigram)
+                            
+    #             # remove positive bigrams that contain two words that are not in the union set
+    #             for bigram in lr.positive_bigrams[:]:  # Iterating over a copy using slicing
+    #                 if bigram[0] not in pos_neg_union and bigram[1] not in pos_neg_union:
+    #                     lr.positive_bigrams.remove(bigram)
+
+                            
+    #             # Train the model with the current combination of hyperparameters
+    #             lr.train('movie_reviews/train', batch_size=batch_size, n_epochs=n_epochs, eta=eta)
+                
+    #             # Test the model
+    #             results = lr.test('movie_reviews/dev')
+                
+    #             # Evaluate the model and get the accuracy
+    #             metrics = lr.evaluate(results)
+    #             accuracy = metrics['accuracy']  # Assuming 'accuracy' is a key in the returned metrics dictionary
+                
+    #             # Check if this accuracy is the best
+    #             if accuracy > best_accuracy:
+    #                 best_accuracy = accuracy
+    #                 best_params = {'batch_size': batch_size, 'n_epochs': n_epochs, 'eta': eta}
+
+    # print(f"Best Accuracy: {best_accuracy}")
+    # print(f"Best Hyperparameters: {best_params}")
