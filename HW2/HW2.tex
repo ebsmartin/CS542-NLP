@@ -1,0 +1,133 @@
+\documentclass[11pt,letterpaper]{article}
+
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{multirow}
+
+\begin{document}
+
+\title{CS542 (Fall 2023) Written Assignment 2\\Sequence Labeling}
+\author{Due October 6, 2023}
+\date{}
+\maketitle
+
+\section{Hidden Markov Models}
+
+(You may find the discussion in Chapter A of the Jurafsky and Martin book helpful.)\\
+
+\noindent You are given the following short sentences, tagged with parts of speech:\\
+
+\texttt{Alice/NN admired/VB Dorothy/NN}
+
+\texttt{Dorothy/NN admired/VB every/DT dwarf/NN}
+
+\texttt{Dorothy/NN cheered/VB}
+
+\texttt{every/DT dwarf/NN cheered/VB}
+
+\begin{enumerate}
+
+\item Train a hidden Markov model on the above data. Specifically, compute the initial probability distribution $\mathbf{\pi}$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|c|c|c|}
+\hline 
+$y_1$ & \texttt{NN} & \texttt{VB} & \texttt{DT} \\ 
+\hline 
+$P(y_1)$ & • & • & • \\ 
+\hline 
+\end{tabular}
+\end{center}
+
+\vspace{11pt}
+
+The transition matrix $\mathbf{A}$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+\hline 
+\multicolumn{2}{|c|}{\multirow{2}{*}{$P(y_i|y_{i-1})$}} & \multicolumn{3}{|c|}{$y_i$} \\ 
+\cline{3-5}
+\multicolumn{2}{|c|}{} & \texttt{NN} & \texttt{VB} & \texttt{DT} \\ 
+\hline 
+\multirow{3}{*}{$y_{i-1}$} & \texttt{NN} & • & • & • \\ 
+\cline{2-5}
+& \texttt{VB} & • & • & • \\ 
+\cline{2-5}
+& \texttt{DT} & • & • & • \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+\vspace{11pt}\newpage
+
+And the emission matrix $\mathbf{B}$:
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline 
+\multicolumn{2}{|c|}{\multirow{2}{*}{$P(x_i|y_i)$}} & \multicolumn{3}{|c|}{$y_i$} \\ 
+\cline{3-5}
+\multicolumn{2}{|c|}{} & \texttt{NN} & \texttt{VB} & \texttt{DT} \\ 
+\hline 
+\multirow{7}{*}{$x_i$} & \texttt{Alice} & • & • & • \\ 
+\cline{2-5}
+& \texttt{admired} & • & • & • \\ 
+\cline{2-5}
+& \texttt{Dorothy} & • & • & • \\ 
+\cline{2-5}
+& \texttt{every} & • & • & • \\ 
+\cline{2-5}
+& \texttt{dwarf} & • & • & • \\ 
+\cline{2-5}
+& \texttt{cheered} & • & • & • \\ 
+\cline{2-5}
+& \texttt{<UNK>} & • & • & • \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+Note that you should account for the unknown word \texttt{<UNK>}, but you don't need to account for the start symbol \texttt{<S>} or the stop symbol \texttt{</S>}. There are ways to train the probabilities of \texttt{<UNK>} from the training set, but for this assignment, you can simply let $\textnormal{count}(\texttt{<UNK>},y)=1$ for all tags $y$ (before smoothing). You should use add-1 smoothing on all three tables.
+
+\item Use the forward algorithm to compute the probability of the following sentence:
+
+\texttt{Alice cheered}
+
+As part of your answer, you should fill in the forward trellis below:
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline 
+ & \texttt{Alice} & \texttt{cheered} \\ 
+\hline 
+\texttt{NN} & • & • \\ 
+\hline 
+\texttt{VB} & • & • \\ 
+\hline 
+\texttt{DT} & • & • \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+\item Use the Viterbi algorithm to compute the best tag sequence for the following sentence:
+
+\texttt{Goldilocks cheered}
+
+As part of your answer, you should fill in the Viterbi trellis below. You should also keep track of backpointers, either using arrows or in a separate table.
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline 
+& \texttt{Goldilocks} & \texttt{cheered} \\ 
+\hline 
+\texttt{NN} & • & • \\ 
+\hline 
+\texttt{VB} & • & • \\ 
+\hline 
+\texttt{DT} & • & • \\ 
+\hline 
+\end{tabular} 
+\end{center}
+
+\end{enumerate}
+
+\section*{Submission Instructions}
+
+Please submit your solutions (in PDF format) to the submission box on Canvas.
+
+\end{document}
