@@ -507,3 +507,9 @@ PA2/data_small/train/ca03
 PA2/data_small/train/ca04
 PA3/EN-wform.w.2.ppmi.svd.500.rcv_vocab.txt
 PA3/GoogleNews-vectors-rcv_vocab.txt
+PA4/pa4_gpu.zip
+PA4/train.conll
+.gitignore
+PA4/test.conll
+PA4/dev.conll
+PA4/en-cw.txt
