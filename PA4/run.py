@@ -46,8 +46,14 @@ def train(parser, train_data, dev_data, output_path, batch_size=1024, n_epochs=1
     ### YOUR CODE HERE (~2 lines)
     ### TODO:
     ###      1) Construct Adam Optimizer in variable `optimizer`
+
+    optimizer = optim.Adam(parser.model.parameters(), lr=lr)
+    
     ###      2) Construct the Cross Entropy Loss Function in variable `loss_func` with `mean`
     ###         reduction (default)
+
+    loss_func = nn.CrossEntropyLoss()
+
     ###
     ### Adam (Kingma and Ba 2015, https://arxiv.org/pdf/1412.6980.pdf) is an algorithm for updating model parameters.
     ### You can think of it as a more sophisticated gradient descent.
@@ -95,18 +101,23 @@ def train_for_epoch(parser, train_data, dev_data, optimizer, loss_func, batch_si
     for i, (train_x, train_y) in enumerate(minibatches(train_data, batch_size)):
         optimizer.zero_grad()   # remove any baggage in the optimizer
         loss = 0. # store loss for this batch here
-        train_x = torch.tensor(train_x)
-        train_y = torch.tensor(train_y.nonzero()[1])
+        train_x = torch.from_numpy(train_x).long()
+        train_y = torch.from_numpy(train_y.nonzero()[1]).long()
 
         ### YOUR CODE HERE (~4 Lines)
         ### TODO:
-        ###      1) Run train_x forward through model to produce `logits`
-        ###      2) Use the `loss_func` parameter to apply the PyTorch CrossEntropyLoss function.
-        ###         This will take `logits` and `train_y` as inputs. It will output the CrossEntropyLoss
-        ###         between softmax(`logits`) and `train_y`. Remember that softmax(`logits`)
-        ###         are the predictions (y^ from the PDF).
-        ###      3) Backprop losses
-        ###      4) Take step with the optimizer
+        ###      # 1) Run train_x forward through model to produce `logits`
+        logits = parser.model(train_x)
+
+        # 2) Use the `loss_func` to apply the CrossEntropyLoss
+        loss = loss_func(logits, train_y)
+
+        # 3) Backprop losses
+        loss.backward()
+
+        # 4) Take step with the optimizer
+        optimizer.step()
+        ### END YOUR CODE
         ### Please see the following docs for support and examples:
         ###     Optimizer Step: https://pytorch.org/docs/stable/optim.html#optimizer-step
 
@@ -147,6 +158,58 @@ if __name__ == "__main__":
 
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
+    # '''~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Hyperparameter Testing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'''
+
+    # def hyperparameter_testing():
+    #     parser, embeddings, train_data, dev_data, test_data = load_and_preprocess_data(True)
+
+    #     params_list = []
+    #     results_list = []
+
+    #     hyperparameters = [
+    #         # {'batch_size': 256, 'n_epochs': 20, 'lr': 0.0001},     
+    #         # {'batch_size': 512, 'n_epochs': 20, 'lr': 0.0001},
+    #         {'batch_size': 1024, 'n_epochs': 10, 'lr': 0.0005},
+    #         # {'batch_size': 1024, 'n_epochs': 10, 'lr': 0.0001},
+    #         # {'batch_size': 1024, 'n_epochs': 20, 'lr': 0.0005},
+    #         # {'batch_size': 1024, 'n_epochs': 20, 'lr': 0.0001},
+    #         # {'batch_size': 2048, 'n_epochs': 20, 'lr': 0.0001},
+            
+    #         # Add more hyperparameter configurations here
+    #     ]
+
+    #     for params in hyperparameters:
+    #         print(f"Testing with hyperparameters: {params}")
+    #         params_list.append(params)
+
+    #         start = time.time()
+    #         model = ParserModel(embeddings)
+    #         parser.model = model
+    #         print("Model initialization took {:.2f} seconds\n".format(time.time() - start))
+
+    #         output_dir = "results/{:%Y%m%d_%H%M%S}/".format(datetime.now())
+    #         output_path = output_dir + "model.weights"
+
+    #         if not os.path.exists(output_dir):
+    #             os.makedirs(output_dir)
+
+    #         uas = train(parser, train_data, dev_data, output_path, 
+    #                     batch_size=params['batch_size'], 
+    #                     n_epochs=params['n_epochs'], 
+    #                     lr=params['lr'])
+
+    #         pp = np.round((.7 - uas) * 20 if uas < .7 else 0)
+    #         print("Performance penalty: %.0f" % pp)
+    #         score = 20 - pp
+    #         print(f"UAS: {uas}, Performance Penalty: {pp}, Score: {score}\n")
+    #         results_list.append(f"UAS: {uas}, Performance Penalty: {pp}, Score: {score}\n")
+
+    #     return params_list, results_list 
+
+    # params_list, results_list = hyperparameter_testing()
+    # print(params_list)
+    # print(results_list)
 
     train(parser, train_data, dev_data, output_path, batch_size=1024, n_epochs=10, lr=0.0005)
 

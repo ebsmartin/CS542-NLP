@@ -42,10 +42,6 @@ class ParserModel(nn.Module):
         @param hidden_size (int): number of hidden units
         @param n_classes (int): number of output classes
         """
-        if torch.cuda.is_available():
-            print('GPU Available!!!')
-            torch.set_default_tensor_type(torch.cuda.FloatTensor)
-
         super(ParserModel, self).__init__()
         self.n_features = n_features
         self.n_classes = n_classes
@@ -90,8 +86,12 @@ class ParserModel(nn.Module):
         ### YOUR CODE HERE (~1-3 Lines)
         ### TODO:
         ###     1) For each index `i` in `w`, select `i`th vector from self.embeddings
+        x = self.embeddings[w]
         ###     2) Reshape the tensor if necessary
-        ###
+        x = x.reshape(w.shape[0], self.n_features * self.embed_size)
+
+        # x = x.view(w.size(0), -1)   # not going to use because it's not as intuitive as reshape for me
+
         ### Note: All embedding vectors are stacked and stored as a matrix. The model receives
         ###       a list of indices representing a sequence of words, then it calls this lookup
         ###       function to map indices to sequence of embeddings.
@@ -101,7 +101,8 @@ class ParserModel(nn.Module):
         ###       (we are asking you to implement that!). Pay attention to tensor shapes
         ###       and reshape if necessary. Make sure you know each tensor's shape before you run the code!
 
-
+        
+        
 
         ### END YOUR CODE
         return x
@@ -140,10 +141,17 @@ class ParserModel(nn.Module):
         ###     ReLU: https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html#torch.nn.ReLU
 
         ### 1. Create the embedding vector with a one at the end of each row
-        ### 2. Calculate the product of the embedding vector and the input weights
-        ### 3. Apply ReLU activation to this
-        ### 4. Multiply this by the hidden layer weights to get logits
+        embeddings = self.embedding_lookup(w)
+        embeddings = torch.cat((embeddings, torch.ones((embeddings.shape[0], 1))), dim=1)
 
+        ### 2. Calculate the product of the embedding vector and the input weights
+        h = torch.matmul(embeddings, self.embed_to_hidden_weight)
+
+        ### 3. Apply ReLU activation to this
+        h = F.relu(h)
+        h = torch.cat((h, torch.ones((h.shape[0], 1))), dim=1)
+        ### 4. Multiply this by the hidden layer weights to get logits
+        logits = torch.matmul(h, self.hidden_to_logits_weight)
         ### END YOUR CODE
         return logits
         
@@ -152,7 +160,7 @@ class ParserModel(nn.Module):
         inds = torch.randint(0, 100, (4, 36), dtype=torch.long)
         selected = self.embedding_lookup(inds)
         try:
-            assert torch.all(selected.data == 0)
+            assert np.all(selected.data.numpy() == 0)
         except AssertionError:
             print("The result of embedding lookup: " \
                                       + repr(selected) + " contains non-zero elements.")

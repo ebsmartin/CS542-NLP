@@ -513,3 +513,15 @@ PA4/train.conll
 PA4/test.conll
 PA4/dev.conll
 PA4/en-cw.txt
+PA5/pa5.zip
+PA4/writeup.docx
+PA4/Backup/run.py
+PA4/Backup/parser_transitions.py
+PA4/Backup/parser_model.py
+PA4/Backup/pa4_grader.py
+PA4/iv.png
+PA4/iii.png
+PA4/ii.png
+PA4/i.png
+.gitignore
+PA4/exampleImage.png

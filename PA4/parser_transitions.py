@@ -50,11 +50,11 @@ class PartialParse(object):
         ###     3. Right Arc
 
         if transition == 'S':
-            pass
+            self.stack.append(self.buffer.pop(0))
         elif transition == 'LA':
-            pass
+            self.dependencies.append((self.stack[-1], self.stack.pop(-2)))
         elif transition == 'RA':
-            pass
+            self.dependencies.append((self.stack[-2], self.stack.pop(-1)))
 
         ### END YOUR CODE
 
@@ -105,7 +105,35 @@ def minibatch_parse(sentences, model, batch_size):
     ###             contains references to the same objects. Thus, you should NOT use the `del` operator
     ###             to remove objects from the `unfinished_parses` list. This will free the underlying memory that
     ###             is being accessed by `partial_parses` and may cause your code to crash.
+    # Initialize partial_parses as a list of PartialParses, one for each sentence in sentences
+    partial_parses = [PartialParse(sentence) for sentence in sentences]
+    # initialize unfinished_parses as a shallow copy of partial_parses
+    unfinished_parses = partial_parses[:]
 
+    # while unfinished_parses is not empty
+    while len(unfinished_parses) > 0:
+
+        # take the first batch_size parses in unfinished_parses as a minibatch
+        mini_batch = unfinished_parses[0:batch_size]
+
+        # predict the next batch of transitions for each partial parse in the minibatch (transitions is a list)
+        transitions = model.predict(mini_batch)
+
+        # perform a parse step on each partial parse in the minibatch with its predicted transition
+        for i, transition in enumerate(transitions):
+            mini_batch[i].parse_step(transition) # I think this is right
+
+        # remove the completed (empty buffer and stack of size 1) parses from unfinished_parses
+        nonempty_parses = []
+        for parse in unfinished_parses:
+            if not (len(parse.buffer) == 0 and len(parse.stack) == 1):
+                nonempty_parses.append(parse)
+                
+        unfinished_parses = nonempty_parses
+    
+    # now add the dependencies of each parse
+    for parse in partial_parses:
+        dependencies.append(parse.dependencies)
 
 
     ### END YOUR CODE
@@ -279,11 +307,11 @@ def test_minibatch_parse():
 if __name__ == '__main__':
     args = sys.argv
     if len(args) != 2:
-        raise Exception("You did not provide a valid keyword. Either provide 'part_c' or 'part_d', when executing this script")
+        raise Exception("You did not provide a valid keyword. Either provide 'part_a' or 'part_b', when executing this script")
     elif args[1] == "part_a":
         test_parse_step()
         test_parse()
     elif args[1] == "part_b":
         test_minibatch_parse()
     else:
-        raise Exception("You did not provide a valid keyword. Either provide 'part_c' or 'part_d', when executing this script")
+        raise Exception("You did not provide a valid keyword. Either provide 'part_a' or 'part_b', when executing this script")
